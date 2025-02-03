@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+
+
+
+        // class Promise {
+        //     constructor(executor) {
+        //         this.PromiseState = 'pending'
+        //         this.PromiseResult = undefined;
+        //         this.callBacks = [];
+
+        //         try {
+        //             executor(this.resolve.bind(this), this.reject.bind(this))
+        //         } catch (e) {
+        //             this.reject(e)
+        //         }
+        //     }
+
+        //     resolve(value) {
+        //         if (this.PromiseState === 'pending') {
+        //             this.PromiseState = 'fulfilled'
+        //             this.PromiseResult = value
+        //         }
+        //         queueMicrotask(() => {
+        //             this.callBacks.forEach(callback => {
+        //                 if (callback.onFulfilled) {
+        //                     callback.onFulfilled(value)
+        //                 }
+        //             })
+        //         })
+        //     }
+
+        //     reject(error) {
+        //         if (this.PromiseState = 'pending') {
+        //             this.PromiseState = 'rejected'
+        //             this.PromiseResult = error
+        //             queueMicrotask(() => {
+        //                 this.callBacks.forEach(callback => {
+        //                     if (callback.onRejected) {
+        //                         callback.onRejected(error);
+        //                     }
+        //                 });
+        //             })
+        //         }
+        //     }
+
+
+        //     then(onFulfilled, onRejected) {
+        //         return new Promise((resolve, reject) => {
+        //             const handleCallback = (callback, stateHandler, resolve, reject) => {
+        //                 queueMicrotask(() => {
+        //                     try {
+        //                         const result = callback(this.PromiseResult);
+        //                         if (result instanceof Promise) {
+        //                             result.then(resolve, reject);
+        //                         } else {
+        //                             resolve(result);
+        //                         }
+        //                     } catch (error) {
+        //                         reject(error);
+        //                     }
+        //                 });
+        //             };
+
+        //             if (this.PromiseState === 'fulfilled') {
+        //                 if (onFulfilled) {
+        //                     handleCallback(onFulfilled, this.PromiseResult, resolve, reject);
+        //                 } else {
+        //                     resolve(this.PromiseResult);
+        //                 }
+        //             } else if (this.PromiseState === 'rejected') {
+        //                 if (onRejected) {
+        //                     handleCallback(onRejected, this.PromiseResult, resolve, reject);
+        //                 } else {
+        //                     reject(this.PromiseResult);
+        //                 }
+        //             } else {
+        //                 this.callBacks.push({
+        //                     onFulfilled: onFulfilled
+        //                         ? value => handleCallback(onFulfilled, value, resolve, reject)
+        //                         : resolve,
+        //                     onRejected: onRejected
+        //                         ? error => handleCallback(onRejected, error, resolve, reject)
+        //                         : reject,
+        //                 });
+        //             }
+        //         });
+        //     }
+
+        //     catch(onRejected) {
+        //         return this.then(undefined, onRejected);
+        //     }
+
+        // }
+
+
+        // new Promise((resolve, reject) => {
+        //     setTimeout(() => {
+        //         resolve('Success');
+        //     }, 1000);
+        // }).then(result => {
+        //     console.log(result); // 输出: Success
+        //     return 'Another success';
+        // }).then(result => {
+        //     console.log(result);
+        //     // 输出: Another success
+        //     throw new Error(111)
+        // }).catch(error => {
+        //     console.error(error);
+        // });
+
+
+
+        class myPromise {
+            static PENDING = "pending";
+            static RESOLVED = "resolved"
+            static REJECTED = "rejected"
+
+            constructor(executor) {
+                this.promiseState = myPromise.PENDING;;
+                this.promiseResult = undefined;
+                this.callBacks = []
+                try {
+                    executor(this.resolve.bind(this), this.reject.bind(this))
+                } catch (error) {
+                    this.reject(error)
+                }
+            }
+
+            resolve(value) {
+                if (this.promiseState === myPromise.PENDING) {
+                    this.promiseState = myPromise.RESOLVED;
+                    this.promiseResult = value;
+                }
+
+                queueMicrotask(() => {
+                    this.callBacks.forEach((callBack) => {
+                        if (callBack.onFulfilled) {
+                            callBack.onFulfilled(value)
+                        }
+                    })
+                })
+
+            }
+
+            reject(error) {
+                if (this.promiseState === myPromise.PENDING) {
+                    this.promiseState = myPromise.REJECTED;
+                    this.promiseResult = error;
+                }
+
+                queueMicrotask(() => {
+                    this.callBacks.forEach(callBack => {
+                        if (callBack.onRejected) {
+                            callBack.onRejected(error)
+                        }
+                    })
+                })
+
+            }
+
+            then(onFulfilled, onRejected) {
+                return new myPromise((resolve, reject) => {
+                    const handleCallback = (callBack, stateHandle, resolve, reject) => {
+                        queueMicrotask(() => {
+                            try {
+                                const result = callBack(stateHandle)
+                                if (result instanceof Promise) {
+                                    result.then(resolve, reject)
+                                } else {
+                                    resolve(result)
+                                }
+                            } catch (error) {
+                                reject(error)
+                            }
+                        })
+                    }
+
+                    if (this.promiseState === myPromise.RESOLVED) {
+                        if (onFulfilled) {
+                            handleCallback(onFulfilled, this.promiseResult, resolve, reject)
+                        } else {
+                            resolve(this.promiseResult)
+                        }
+                    } else if (this.promiseState === myPromise.REJECTED) {
+                        if (onRejected) {
+                            handleCallback(onFulfilled, this.promiseResult, resolve, reject)
+                        } else {
+                            reject(this.promiseResult)
+                        }
+                    } else {
+                        this.callBacks.push({
+                            onFulfilled: onFulfilled ?
+                                value => handleCallback(onFulfilled, value, resolve, reject)
+                                : resolve,
+                            onRejected: onRejected ?
+                                error => handleCallback(onRejected, error, resolve, reject)
+                                : reject
+                        })
+                    }
+                })
+            }
+
+            catch(onRejected) {
+                return this.then(undefined, onRejected)
+            }
+        }
+
+
+
+        new myPromise((resolve, reject) => {
+            setTimeout(() => {
+                resolve('Success');
+            }, 1000);
+        }).then(result => {
+            console.log(result); // 输出: Success
+            return 'Another success';
+        }).then(result => {
+            console.log(result);
+            // 输出: Another success
+            throw new Error(111)
+        }).catch(error => {
+            console.error(error);
+        });
+
+
+
+
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <button class="btn" style="width: 200px;height: 100px;font-size: larger;">点击</button>
+    <script>
+        // function throttle(fn, time) {
+        //     let timer = null
+        //     return function (...args) {
+        //         if (!timer) {
+        //             timer = setTimeout(() => {
+        //                 fn.apply(this, args)
+        //                 timer = null
+        //             }, time)
+        //         }
+        //     }
+        // }
+        //另一种写法
+        // function throttle(fn, time) {
+        //     let timer = true
+        //     return function (...args) {
+        //         if (timer === false) return;
+        //         else {
+        //             timer = false
+        //             setTimeout(() => {
+        //                 fn.apply(this, args)
+        //                 timer = true
+        //             }, time)
+        //         }
+        //     }
+        // }
+
+        //立即执行
+        // function throttle(fn, delay) {
+        //     let last = Date.now();
+        //     return function (...args) {
+        //         const now = Date.now()
+        //         if (now - last > delay) {
+        //             last = now
+        //             fn.apply(this, args)
+        //         }
+        //     }
+        // }
+
+        function aaa() {
+            console.log(this, 111)
+        }
+
+        // const throttleTask = throttle(aaa, 1000)
+        // const btn = document.querySelector('.btn')
+        // btn.addEventListener('click', throttleTask);
+
+        function throttle(fn, delay) {
+            let timer = null
+            return function (...args) {
+                if (!timer) {
+                    timer = setTimeout(() => {
+                        fn.apply(this, args)
+                        timer = null
+                    }, delay);
+                }
+            }
+        }
+
+        // function throttle(fn, delay) {
+        //     let last = Date.now()
+        //     return function (...args) {
+        //         const now = Date.now()
+        //         if (now - last > delay) {
+        //             last = now
+        //             fn.apply(this, args)
+        //         }
+        //     }
+        // }
+
+
+
+        const throttleTask = throttle(aaa, 1000)
+        const btn = document.querySelector('.btn')
+        btn.addEventListener('click', throttleTask)
+
+
+
+    </script>
+</body>
+
+</html>

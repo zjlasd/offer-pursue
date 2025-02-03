@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        function limitParallel(fn, limit) {
+            const waitTask = [];
+            function run(...args) {
+                limit--;
+                return fn(...args).finally(() => {
+                    limit++;
+                    if (waitTask.length) {
+                        waitTask.shift()();
+                    }
+                });
+            }
+
+            return (...args) => {
+                if (limit > 0) {
+                    return run(...args);
+                } else {
+                    return new Promise((resolve) => {
+                        waitTask.push(() => resolve(run(...args)));
+                    });
+                }
+            };
+        }
+
+        function mockTask(id, delay) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve(`Task ${id} result`);
+                }, delay);
+            });
+        }
+        const limitedMockTask = limitParallel(mockTask, 3);
+
+        const tasks = [
+            () => limitedMockTask(1, 1000),
+            () => limitedMockTask(2, 1000),
+            () => limitedMockTask(3, 1000),
+            () => limitedMockTask(4, 1000),
+            () => limitedMockTask(5, 1000),
+            () => limitedMockTask(6, 1000)
+        ];
+
+        function runTasks(tasks) {
+            for (const task of tasks) {
+                task().then(result => console.log(result));
+            }
+        }
+
+        runTasks(tasks);
+
+
+
+    </script>
+</body>
+
+</html>

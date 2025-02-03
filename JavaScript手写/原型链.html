@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        function Person(age) {
+            this.age = age
+        }
+        Person.prototype.add = function () {
+            return this.a + this.b;
+        };
+        // Person.prototype.name = 'kavin'
+        var person1 = new Person(18)
+        // console.log(person1.name)  //kavin;
+
+        console.log(person1.prototype)
+        console.log(person1.__proto__)
+        console.log(Person.prototype)
+        console.log(Person.__proto__)
+        console.log(Person.prototype.__proto__)
+        console.log(Object.prototype)
+        console.log(Person.prototype.constructor)
+        console.log(Function.prototype)
+
+
+        console.log(Promise.resolve(2))
+
+    </script>
+</body>
+
+</html>

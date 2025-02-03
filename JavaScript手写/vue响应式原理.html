@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <script>
+        function reactive(target) {
+            return new Proxy(target,
+                {
+                    get(target, key, receiver) {
+                        const result = Reflect.get(target, key, receiver);
+                        track(target, key);
+                        return result
+                    },
+                    set(target, key, value, receiver) {
+                        const result = Reflect.set(target, key, value, receiver)
+                        trigger(target, key);
+                        return result
+                    }
+                }
+            )
+        }
+
+        let activeEffect = null;
+        const targetMap = new Map()
+
+        function track(target, key) {
+            if (!activeEffect) {
+                return;
+            }
+
+            let depMap = targetMap.get(target)
+            if (!depMap) {
+                depMap = new Map()
+                targetMap.set(target, depMap)
+            }
+
+            let dep = depMap.get(key)
+            if (!dep) {
+                dep = new Set()
+                depMap.set(key, dep)
+            }
+
+            if (!dep.has(activeEffect)) {
+                dep.add(activeEffect)
+                activeEffect.deps.push(dep);
+            }
+        }
+
+        function trigger(target, key) {
+            const depMap = targetMap.get(target)
+            if (!depMap) {
+                return
+            }
+            const dep = depMap.get(key)
+            if (dep) {
+                dep.forEach(effect => effect.run())
+            }
+        }
+
+
+        class ReactiveEffect {
+            constructor(fn) {
+                this.fn = fn
+                this.deps = []
+            }
+
+            run() {
+                activeEffect = this
+                this.fn()
+                activeEffect = null
+            }
+        }
+
+        function effect(fn) {
+            const _effect = new ReactiveEffect(fn)
+            _effect.run()
+            return _effect
+        }
+
+        // 使用示例
+        const state = reactive({ count: 0 });
+
+        effect(() => {
+            console.log(`Count is: ${state.count}`);
+        });
+
+        state.count++; // 触发更新，输出 "Count is: 1"
+        state.count++; // 触发更新，输出 "Count is: 2"
+
+
+    </script>
+</body>
+
+</html>

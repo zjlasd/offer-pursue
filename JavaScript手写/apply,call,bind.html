@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        //apply
+        // Function.prototype.myApply = function (context,args) {
+        //     context = context || window
+
+        //     if (typeof this !== 'function') {
+        //         return new Error('typeReeor')
+        //     }
+        //     let res
+        //     context.fn = this
+        //     if (Array.isArray(args) && args.length !== 0) {
+        //         res = context.fn(...args)
+        //     } else {
+        //         res = context.fn()
+        //     }
+        //     delete context.fn
+        //     return res
+
+        // }
+
+        //call
+        // Function.prototype.myCall = function (context, ...args) {
+        //     context = context || window
+
+        //     if (typeof this !== 'function') {
+        //         return new Error('typeReeor')
+        //     }
+
+        //     let res
+        //     context.fn = this
+        //     if (Array.isArray(args) && args.length !== 0) {
+        //         res = context.fn(...args)
+        //     } else {
+        //         res = context.fn()
+        //     }
+        //     delete context.fn
+        //     return res
+        // }
+
+        //bind()
+        // Function.prototype.myBind = function (context, ...oherArgs) {
+        //     if (typeof this !== "function") {
+        //         throw new TypeError("Error");
+        //     }
+        //     context = context === null || context === undefined ? window : Object(context)
+        //     context = context || window
+        //     context.fn = this
+
+        //     // Object.defineProperty(context, 'fn', {
+        //     //     enumerable: false,
+        //     //     configurable: true,
+        //     //     writable: false,
+        //     //     value: this
+        //     // })
+        //     return (...newArgs) => {
+        //         let allArgs = [...oherArgs, ...newArgs]
+        //         context.fn(...allArgs)
+        //     }
+
+
+        // }
+
+        // function foo(name, age, height, address) {
+        //     console.log(this, name, age, height, address)
+        // }
+        // let newFoo = foo.myBind('abc,kobe', 30)
+
+        // newFoo(1.22, 'skjhqagd')
+        // function foo(name, age, height, address) {
+        //     console.log(this, name, age, height, address)
+        // }
+
+
+
+        // let newFoo = foo.myBind('abc,kobe', 30)
+
+        // newFoo(1.22, 'skjhqagd')
+
+
+
+        // function bar(age, sex) {
+        //     return {
+        //         name: this.name,
+        //         age,
+        //         sex
+        //     }
+        // }
+        // const obj = {
+        //     name: 'cyx'
+        // }
+
+        // bar(obj, [22, "男"])
+        // console.log(bar.myCall(obj, 22, "男"))
+
+
+        Function.prototype.myApply = function (context, args) {
+            if (context === null || context === undefined) {
+                context = window
+            }
+
+            // context = context === null || context === undefined ? window : context
+            context.fn = this
+            if (args) {
+                result = context.fn(...args)
+            } else {
+                result = context.fn()
+            }
+            delete context.fn
+            return result
+        }
+        Function.prototype.myCall = function (context, ...args) {
+            if (context === null || context === undefined) {
+                context = window
+            }
+
+
+            context.fn = this
+            if (args) {
+                result = context.fn(...args)
+            } else {
+                result = context.fn()
+            }
+            delete context.fn
+            return result
+        }
+
+        function foo(name, age) {
+            console.log(this.name, age)
+        }
+
+        const bar = {
+            name: 'aaa'
+        }
+        const newFoo = foo.bind(bar, 'bbb', 17)
+        newFoo()
+
+        Function.prototype.myBind = function (context, ...otherargs) {
+
+            context.fn = this
+            return (newArgs) => {
+                let allArgs = [...otherargs, ...newArgs]
+                context.fn(...allArgs)
+            }
+        }
+
+
+
+    </script>
+</body>
+
+</html>

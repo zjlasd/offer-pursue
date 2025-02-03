@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<button class="btn" style="width: 200px;height: 100px;font-size: larger;">点击</button>
+
+<body>
+    <script>
+        const btn = document.querySelector('.btn')
+        //非立即执行
+        // function debounce(fn, delay) {
+        //     let timer = null
+        //     return function (...args) {
+        //         clearTimeout(timer)
+        //         timer = setTimeout(() => {
+        //             fn.apply(this, args)
+        //         timer = null
+        //         }, delay)
+        //     }
+        // }
+
+        //立即执行
+        // function debounce(fn, wait) {
+        //     let timerId = null;
+        //     let flag = true;
+        //     return function (...args) {
+        //         if (timerId) {
+        //             clearTimeout(timerId);
+        //         }
+        //         if (flag) {
+        //             fn.apply(this, args)
+        //             flag = false
+        //         }
+
+        //         timerId = setTimeout(() => {
+        //             fn.apply(this, args);
+        //             timerId = null
+        //             flag = false
+        //         }, wait)
+        //     }
+        // }
+
+        // function aaa() {
+        //     console.log(this, 111)
+        // }
+
+
+        // const debounceTask = debounce(aaa, 1000)
+        // btn.addEventListener('click', debounceTask);
+
+        // const debounce = (fn, delay, flag = true) => {
+        //     let timer = null
+        //     return function (...args) {
+        //         if (flag) {
+        //             fn.apply(this, args)
+        //             flag = false
+        //         }
+        //         clearTimeout(timer)
+        //         timer = setTimeout(() => {
+        //             fn.apply(this, args)
+        //             timer = null
+        //         }, delay)
+        //     }
+        // }
+
+        function debounce(fn, delay, flag = true) {
+            let timer = null
+            return function (...args) {
+                if (flag) {
+                    fn.apply(this, args)
+                    flag = false
+                }
+                clearTimeout(timer)
+                timer = setTimeout(() => {
+                    fn.apply(this, args)
+                    timer = null
+                }, delay)
+            }
+        }
+
+
+        
+
+
+
+        function aaa() {
+            console.log(this, 'aaa')
+        }
+
+        const bbb = debounce(aaa, 1000)
+        btn.addEventListener('click', bbb)
+
+
+
+    </script>
+
+</body>
+
+</html>

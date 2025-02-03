@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+
+    <script>
+        /**
+         * 主入口函数：将模板字符串编译成渲染函数
+         */
+        function compileToFunction(template) {
+            // 1. 将模板解析为 AST
+            const ast = parse(template);
+
+            console.log("AST 抽象语法树:", JSON.stringify(ast, null, 2)); // 输出 AST
+
+            // 2. 生成渲染函数代码
+            const code = generate(ast);
+
+            console.log("渲染函数代码:", code); // 输出生成的渲染函数代码
+
+            // 3. 使用 new Function 将代码转换为渲染函数
+            const render = new Function(`return ${code}`);
+            return render();
+        }
+
+        /**
+         * 解析模板字符串为 AST（抽象语法树）
+         */
+        function parse(template) {
+            const tokens = [];
+            const tagRE = /<\/?([a-z]+)(.*?)>/gi; // 匹配标签
+            const directiveRE = /v-([a-zA-Z\-]+)="([^"]+)"/g; // 匹配指令（如 v-if）
+            const dynamicAttrRE = /:([a-zA-Z\-]+)="([^"]+)"/g; // 匹配动态绑定（如 :class）
+            const eventAttrRE = /@([a-zA-Z\-]+)="([^"]+)"/g; // 匹配事件绑定（如 @click）
+
+            let match;
+            let cursor = 0;
+
+            while ((match = tagRE.exec(template))) {
+                const text = template.slice(cursor, match.index).trim();
+                if (text) {
+                    tokens.push({ type: 'text', content: text }); // 添加文本节点
+                }
+
+                if (match[0][1] === '/') {
+                    tokens.push({ type: 'tagEnd', tag: match[1] }); // 结束标签
+                } else {
+                    const attrs = {};
+                    let directiveMatch;
+
+                    // 解析指令（如 v-if）
+                    while ((directiveMatch = directiveRE.exec(match[2]))) {
+                        console.log(match)
+                        attrs[`v-${directiveMatch[1]}`] = directiveMatch[2];
+                    }
+
+                    // 解析动态属性（如 :class）
+                    while ((directiveMatch = dynamicAttrRE.exec(match[2]))) {
+                        attrs[`:${directiveMatch[1]}`] = directiveMatch[2];
+                    }
+
+                    // 解析事件绑定（如 @click）
+                    while ((directiveMatch = eventAttrRE.exec(match[2]))) {
+                        attrs[`@${directiveMatch[1]}`] = directiveMatch[2];
+                    }
+
+                    // 静态属性
+                    const staticAttrs = match[2]
+                        .trim()
+                        .split(/\s+/)
+                        .filter(attr => !directiveRE.test(attr) && !dynamicAttrRE.test(attr) && !eventAttrRE.test(attr));
+                    staticAttrs.forEach(attr => {
+                        const [key, value] = attr.split('=');
+                        if (key) {
+                            attrs[key] = value ? value.replace(/["']/g, '') : true; // 去掉引号
+                        }
+                    });
+
+                    tokens.push({ type: 'tagStart', tag: match[1], attrs });
+                }
+                cursor = match.index + match[0].length;
+            }
+
+            const remainingText = template.slice(cursor).trim();
+            if (remainingText) {
+                tokens.push({ type: 'text', content: remainingText }); // 添加剩余文本
+            }
+
+            return buildAST(tokens);
+        }
+
+        /**
+         * 构建 AST
+         */
+        function buildAST(tokens) {                                                        
+            console.log(tokens)
+            const root = { type: 'root', children: [] };
+            const stack = [root];
+
+            for (const token of tokens) {
+                if (token.type === 'text') {
+                    stack[stack.length - 1].children.push({
+                        type: 'text',
+                        content: token.content,
+                    });
+                } else if (token.type === 'tagStart') {
+                    const elementNode = {
+                        type: 'element',
+                        tag: token.tag,
+                        attrs: token.attrs || {},
+                        children: [],
+                    };
+                    stack[stack.length - 1].children.push(elementNode);
+                    stack.push(elementNode);
+                } else if (token.type === 'tagEnd') {
+                    stack.pop();
+                }
+            }
+
+            return root;
+        }
+
+        /**
+         * 生成渲染函数代码
+         */
+        function generate(ast) {
+            function genNode(node) {
+                if (node.type === 'text') {
+                    // 处理插值表达式 {{ message }}
+                    return node.content.includes('{ {')
+                        ? node.content.replace(/\{\{(.+?)\}\}/g, (_, exp) => `" + (${exp.trim()}) + "`)
+                        : JSON.stringify(node.content);
+                } else if (node.type === 'element') {
+                    const tag = node.tag;
+                    const attrs = genAttrs(node.attrs);
+                    const children = node.children.map(genNode).join(',');
+                    return `_createElement("${tag}", ${attrs}, [${children}])`;
+                }
+            }
+
+
+            function genAttrs(attrs) {
+                const staticAttrs = {};
+                const directives = [];
+                const events = {};
+
+                for (const key in attrs) {
+                    if (key.startsWith('v-')) {
+                        directives.push({ name: key, value: attrs[key] }); // 解析指令
+                    } else if (key.startsWith(':')) {
+                        staticAttrs[key.slice(1)] = `(${attrs[key]})`; // 动态绑定
+                    } else if (key.startsWith('@')) {
+                        events[key.slice(1)] = attrs[key]; // 事件绑定
+                    } else {
+                        staticAttrs[key] = JSON.stringify(attrs[key]); // 静态属性
+                    }
+                }
+
+                return JSON.stringify({ staticAttrs, directives, events }).replace(/"(\([^)]*\))"/g, (_, exp) => exp); // 去掉动态绑定引号
+            }
+
+            return `function render(_createElement) {
+        return ${genNode(ast.children[0])};
+    }`;
+        }
+
+        /**
+         * 模拟 Vue3 的 _createElement 函数
+         */
+        function _createElement(tag, { staticAttrs, directives, events }, children) {
+            return { tag, staticAttrs, directives, events, children };
+        }
+
+        /**
+         * 测试模板编译器
+         */
+        const template = `
+<div id="app" :class="dynamicClass" @click="handleClick" v-if="isVisible">
+  <h1>{{ title }}</h1>
+  <p>This is a more complete compiler!</p>
+</div>
+`;
+
+        // 将模板编译为渲染函数
+        const renderFunction = compileToFunction(template);
+
+        // 执行渲染函数，生成虚拟 DOM
+        const vdom = renderFunction(_createElement);
+
+        console.log("虚拟 DOM:", JSON.stringify(vdom, null, 2)); // 输出虚拟 DOM
+
+
+    </script>
+</body>
+
+</html>

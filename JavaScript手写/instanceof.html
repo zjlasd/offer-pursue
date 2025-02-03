@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        function customInstanceOf(instance, constructor) {
+            let proto = constructor.prototype;
+            let instanceProto = Object.getPrototypeOf(instance)
+
+            while (instanceProto !== null) {
+                if (instanceProto === proto) {
+                    return true
+                } else {
+                    instanceProto = Object.getPrototypeOf(instanceProto)
+                }
+            }
+            return false
+        }
+
+
+
+
+        function Person(name) {
+            this.name = name;
+        }
+
+        let john = new Person("John");
+
+        console.log(customInstanceOf(john, Person)); // 输出: true
+        console.log(customInstanceOf(john, Object)); // 输出: true
+        console.log(customInstanceOf(john, Array));  // 输出: false
+
+
+    </script>
+</body>
+
+</html>

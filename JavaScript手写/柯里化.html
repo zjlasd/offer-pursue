@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        function curry(fn) {
+            let length = fn.length;
+            return function temp(...args) {
+
+                if (args.length >= length) {
+                    return fn(...args)
+                } else {
+                    return function (...otherargs) {
+                        return temp(...args, ...otherargs)
+                    }
+                }
+            }
+        }
+        // function curry(fn) {
+        //     let length = fn.length; // 获取函数的参数个数
+
+        //     // 定义一个内部函数，使用闭包来保存参数
+        //     return function temp(...args) {
+        //         // 收集当前调用的所有参数
+        //         if (args.length >= length) {
+        //             // 如果收集的参数数量足够，则调用原始函数
+        //             return fn(...args);
+        //         } else {
+        //             // 如果参数数量不足，则返回一个新的函数，继续收集参数
+        //             return function (...otherargs) {
+        //                 // 合并之前的参数和新传入的参数
+        //                 return temp(...args, ...otherargs);
+        //             }
+        //         }
+        //     }
+        // }
+
+
+        function add(a, b, c) {
+            return a + b + c;
+        }
+        let test = curry(add);
+        console.log(test(1)(2, 3));
+
+    </script>
+</body>
+
+</html>

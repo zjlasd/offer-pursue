@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        // function mysetInterval(fn, delay) {
+        //     let expectedTime = Date.now() + delay
+        //     function interval() {
+        //         let drift = Date.now() - expectedTime
+        //         expectedTime += delay
+
+        //         setTimeout(interval, Math.max(0, delay - drift))
+        //         fn()
+        //     }
+        //     setTimeout(interval, delay)
+        // }
+
+        //限制次数
+        function mysetInterval(fn, delay, maxCalls) {
+            let callCount = 0
+            function interval() {
+                if (callCount >= maxCalls) return;
+                callCount++
+                setTimeout(interval, delay)
+                fn()
+            }
+            setTimeout(interval, delay)
+        }
+        function sayHello() {
+            console.log("Hello!");
+        }
+
+        // 每隔 1 秒打印一次 "Hello!"，总共打印 5 次
+        mysetInterval(sayHello, 1000, 5);
+
+
+    </script>
+</body>
+
+</html>

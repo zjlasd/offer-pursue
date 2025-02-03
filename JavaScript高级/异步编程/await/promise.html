@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        function promisify(fn) {
+            console.log(fn, "fn"); // 保存的是原始函数(add)
+            return function (...args) {
+                console.log(...args, "...args"); // 2 6 保存的是调用时的参数 返回promise对象
+
+                return new Promise(function (resolve, reject) {
+                    // 将callback放到参数末尾,并执行callback函数
+                    args.push(function (err, ...arg) {
+                        console.log(...args, "12"); // 2 6 callback,
+                        if (err) {
+                            reject(err);
+                            return;
+                        }
+                        resolve(...arg);
+                    });
+
+                    fn.apply(null, args);
+                });
+            }
+        }
+
+        // 示例
+        let add = (a, b, callback) => {
+            let result = a + b;
+            if (typeof result === 'number') {
+                callback(null, result)
+            } else {
+                callback("请输入正确数字")
+            }
+        }
+
+        const addCall = promisify(add);
+        addCall(2, 6).then((res) => {
+            console.log(res);
+        })
+
+
+    </script>
+</body>
+
+</html>

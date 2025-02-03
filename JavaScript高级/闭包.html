@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        //无泄漏
+        // function fn() {
+        //     //fn函数作用域的局部变量arr
+        //     const arr = new Array(10000000)
+        //     function fn1() {
+        //         // 在fn1函数作用域下访问(依赖)外层fn函数作用域的局部变量arr，此时会产生闭包
+        //         console.log(arr[0]);
+        //     }
+        //     fn1()
+        // }
+        // fn()
+
+        // function fn() {
+        //     const arr = new Array(10000000)
+        //     function fn1() {
+        //         console.log(arr[0]);
+        //     }
+        //     return fn1
+        // }
+        // fn()()
+
+        //内存泄漏
+        function fn() {
+            const arr = new Array(10000000)
+            function fn1() {
+                console.log(arr[0]);
+            }
+            return fn1
+        }
+        //变量test由于保存了fn1函数的引用，而fn1函数作用域内又依赖于fn作用域的Array(10000000)，
+        // 所以导致Array(10000000)在堆内存中无法被释放
+        let test = fn()
+        test()
+        test = null
+
+    </script>
+</body>
+
+</html>

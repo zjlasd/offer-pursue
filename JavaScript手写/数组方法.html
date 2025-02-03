@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        //reduce
+        Array.prototype.myReduce = function (fn, initalValue) {
+            const array = this
+            let pre = initalValue || array[0]
+            const startIndex = initalValue ? 0 : 1;
+            for (let i = startIndex; i < array.length; i++) {
+                const cur = array[i]
+                pre = fn(pre, cur, i, arr)
+            }
+            return pre
+        }
+
+        //forEach
+        Array.prototype.myforEach = function (fn, context) {
+            let index = 0;
+            let arr = this
+            context = context || this
+            if (typeof fn != 'function') {
+                throw new TypeError(fn + 'is not a function')
+            }
+
+            while (index < arr.length) {
+                if (index in arr) {
+                    fn.call(context, arr[index], index, arr)
+                }
+                index++
+            }
+        }
+
+        // let arr = [1, 3, 5, 7]
+        // arr.myforEach((item, i, arr) => {
+        //     console.log('item:' + item + 'i:' + i)
+        // })
+
+
+        //map
+        Array.prototype.mymap = function (fn, context) {
+            let arr = this
+            context = context || this
+            let index = 0
+            let newArr = []
+            if (typeof fn !== 'function') {
+                throw new TypeError(fn + '')
+            }
+
+            while (index < arr.length) {
+                if (index in arr) {
+                    let res = fn.call(context, arr[index], index, arr)
+                    newArr[index] = res
+                }
+                index++
+            }
+            return newArr
+        }
+
+        // let arr = [1, 3, 5, 7]
+        // let newArr = arr.mymap((item) => {
+        //     return item * 3
+        // })
+        // console.log(newArr)
+
+
+        //flat
+        Array.prototype.myflat = function (num = 1) {
+            if (!Number(num) || Number(num) < 0) {
+                return this
+            }
+
+            let newArr = []
+            let arr = this
+            arr.forEach((item) => {
+                if (Array.isArray(item)) {
+                    newArr = newArr.concat(item.flat(--num))
+                } else {
+                    newArr.push(item)
+                }
+            })
+            return newArr
+        }
+
+        // const arr = [1, [2, [3, 'a', [4]]]]
+        // console.log(arr.myflat('dsdsadf'));  // [1, [2, [3, 'a', [4]]]]
+        // console.log(arr.myflat(-32)); // [1, [2, [3, 'a', [4]]]]
+        // console.log(arr.myflat(0));   // [1, [2, [3, 'a', [4]]]]
+        // console.log(arr.myflat('1'));   // [1, 2, [3, 'a', [4]]]
+        // console.log(arr.myflat('2'));    // [1, 2, 3, 'a', [4]]
+        // console.log(arr.myflat(3));       // [1, 2, 3, 'a', 4]
+        // console.log(arr.myflat(Infinity));     // [1, 2, 3, 'a', 4]
+        // console.log(arr.myflat('Infinity'));   // [1, 2, 3, 'a', 4]
+
+
+        //filter
+        Array.prototype.myfilter = function (fn, context) {
+            let array = this
+            context = context || this
+            let index = 0
+            let newArray = []
+            while (index < array.length) {
+                if (index in array) {
+                    const res = fn.call(context, array[index], index, array)
+                    if (res) {
+                        newArray.push(array[index])
+                    }
+                }
+                index++
+            }
+            return newArray
+        }
+
+        //
+
+
+    </script>
+</body>
+
+</html>

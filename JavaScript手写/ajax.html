@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        function handleGet(url) {
+            let response = ''
+
+            const xhr = new XMLHttpRequest()
+
+            xhr.open('GET', url)
+
+            xhr.send()
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        response = xhr.responseText
+                        console.log(response)
+                    } else {
+                        return xhr.status
+                    }
+                }
+            }
+        }
+        
+
+    </script>
+</body>
+
+</html>
